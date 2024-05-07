@@ -36,8 +36,15 @@ public class CDsGUI extends JFrame {
             AgregarCDGUI agregarCDGUI = new AgregarCDGUI(CDsGUI.this);
         });
         
+        btnListar.addActionListener((ActionEvent e) -> {
+            try {
+                cargarContenido();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        });
+        
         btnBuscar.addActionListener((ActionEvent e) -> {
-            // Abre la ventana para agregar material
             BuscarCDGUI buscarCDGUI = new BuscarCDGUI(CDsGUI.this);
         });
 

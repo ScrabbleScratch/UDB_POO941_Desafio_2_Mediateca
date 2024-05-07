@@ -36,8 +36,16 @@ public class DVDsGUI extends JFrame {
             AgregarDVDGUI agregarDVDGUI = new AgregarDVDGUI(DVDsGUI.this);
         });
         
+        btnListar.addActionListener((ActionEvent e) -> {
+            try {
+                cargarContenido();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        });
+        
         btnBuscar.addActionListener((ActionEvent e) -> {
-            // Abre la ventana para agregar material
+            // Abre la ventana para buscar material
             BuscarDVDGUI buscarDVDGUI = new BuscarDVDGUI(DVDsGUI.this);
         });
 

@@ -36,8 +36,16 @@ public class LibrosGUI extends JFrame {
             AgregarLibroGUI agregarLibroGUI = new AgregarLibroGUI(LibrosGUI.this);
         });
 
+        btnListar.addActionListener((ActionEvent e) -> {
+            try {
+                cargarContenido();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        });
+        
         btnBuscar.addActionListener((ActionEvent e) -> {
-            // Abre la ventana para agregar material
+            // Abre la ventana para buscar material
             BuscarLibroGUI buscarLibroGUI = new BuscarLibroGUI(LibrosGUI.this);
         });
         
