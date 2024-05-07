@@ -17,7 +17,7 @@ public class LibrosGUI extends JFrame {
 
     public LibrosGUI() {
         setTitle("Mediateca          **  Sistema de Libros  **");
-        setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1360, 700);
 
         // Panel de botones

@@ -17,7 +17,7 @@ public class CDsGUI extends JFrame {
 
     public CDsGUI() {
         setTitle("Mediateca          **  Sistema de CDs  **");
-        setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1360, 700);
 
         // Panel de botones

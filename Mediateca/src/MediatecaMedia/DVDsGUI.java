@@ -17,7 +17,7 @@ public class DVDsGUI extends JFrame {
 
     public DVDsGUI() {
         setTitle("Mediateca          **  Sistema de DVDs  **");
-        setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1360, 700);
 
         // Panel de botones
