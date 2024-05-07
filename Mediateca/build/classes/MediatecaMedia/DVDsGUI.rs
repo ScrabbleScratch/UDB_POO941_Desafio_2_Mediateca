@@ -1,0 +1,16 @@
+MediatecaMedia.AgregarDVDGUI
+MediatecaMedia.BuscarDVDGUI
+MediatecaMedia.BuscarDVDGUI$2
+MediatecaMedia.DVD
+MediatecaMedia.ModificarDVDGUI$3
+MediatecaMedia.ModificarDVDGUI$2
+MediatecaMedia.ModificarDVDGUI$4
+MediatecaMedia.AgregarDVDGUI$1
+MediatecaMedia.AgregarDVDGUI$2
+MediatecaMedia.BuscarDVDGUI$1
+MediatecaMedia.ModificarDVDGUI$1
+MediatecaMedia.DVDsGUI
+MediatecaMedia.BorrarDVDGUI$1
+MediatecaMedia.BorrarDVDGUI
+MediatecaMedia.ModificarDVDGUI
+MediatecaMedia.BorrarDVDGUI$2

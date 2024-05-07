@@ -16,7 +16,7 @@ public class RevistasGUI extends JFrame {
     private Connection conexion;
 
     public RevistasGUI() {
-        setTitle("Mediateca          **  Sistema de Libros  **");
+        setTitle("Mediateca          **  Sistema de Revistas  **");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1360, 700);
 
