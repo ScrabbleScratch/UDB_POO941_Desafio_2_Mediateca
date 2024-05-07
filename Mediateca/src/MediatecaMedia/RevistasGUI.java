@@ -35,6 +35,11 @@ public class RevistasGUI extends JFrame {
             // Abre la ventana para agregar material
             AgregarRevistaGUI agregarRevistaGUI = new AgregarRevistaGUI(RevistasGUI.this);
         });
+        
+        btnBuscar.addActionListener((ActionEvent e) -> {
+            // Abre la ventana para agregar material
+            BuscarRevistaGUI buscarRevistaGUI = new BuscarRevistaGUI(RevistasGUI.this);
+        });
 
         // Agrega más ActionListeners para los otros botones según sea necesario
 
@@ -111,6 +116,24 @@ public class RevistasGUI extends JFrame {
         cargarContenido();
     }
 
+    // Metodo para buscar material en la base de datos
+    public void buscarContenido(String busqueda) throws SQLException {
+        modeloTabla.setRowCount(0);
+        PreparedStatement statement = conexion.prepareStatement("SELECT * FROM revistas WHERE titulo = ?");
+        statement.setString(1, busqueda);
+        ResultSet resultSet = statement.executeQuery();
+        while (resultSet.next()) {
+            modeloTabla.addRow(new Object[]{
+                    resultSet.getString("codigo"),
+                    resultSet.getString("titulo"),
+                    resultSet.getString("editorial"),
+                    resultSet.getString("periodicidad"),
+                    resultSet.getString("fecha_publicacion"),
+                    resultSet.getInt("unidades")
+            });
+        }
+    }
+    
     // Método para cerrar la conexión a la base de datos
     public void cerrarConexion() {
         try {
@@ -178,6 +201,49 @@ class AgregarRevistaGUI extends JFrame {
             }
         });
         add(btnAgregar);
+
+        btnCancelar = new JButton("Cancelar");
+        btnCancelar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                dispose();
+            }
+        });
+        add(btnCancelar);
+
+        setVisible(true);
+    }
+}
+
+class BuscarRevistaGUI extends JFrame {
+    private RevistasGUI gui;
+    private JTextField txtBuscar;
+    private JButton btnBuscar, btnCancelar;
+
+    public BuscarRevistaGUI(RevistasGUI gui) {
+        this.gui = gui;
+        setTitle("Buscar Revista");
+        setSize(600, 100);
+        setLayout(new GridLayout(1, 2));
+
+        add(new JLabel("Título:"));
+        txtBuscar = new JTextField();
+        add(txtBuscar);
+
+        btnBuscar = new JButton("Buscar");
+        btnBuscar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Validar y agregar el material
+                String busqueda = txtBuscar.getText();
+
+                try {
+                    gui.buscarContenido(busqueda);
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+                dispose();
+            }
+        });
+        add(btnBuscar);
 
         btnCancelar = new JButton("Cancelar");
         btnCancelar.addActionListener(new ActionListener() {

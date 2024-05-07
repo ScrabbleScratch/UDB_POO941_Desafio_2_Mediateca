@@ -36,6 +36,11 @@ public class LibrosGUI extends JFrame {
             AgregarLibroGUI agregarLibroGUI = new AgregarLibroGUI(LibrosGUI.this);
         });
 
+        btnBuscar.addActionListener((ActionEvent e) -> {
+            // Abre la ventana para agregar material
+            BuscarLibroGUI buscarLibroGUI = new BuscarLibroGUI(LibrosGUI.this);
+        });
+        
         // Agrega más ActionListeners para los otros botones según sea necesario
 
         panelMenu.add(btnAgregar);
@@ -117,6 +122,26 @@ public class LibrosGUI extends JFrame {
         cargarContenido();
     }
 
+    // Metodo para buscar material en la base de datos
+    public void buscarContenido(String busqueda) throws SQLException {
+        modeloTabla.setRowCount(0);
+        PreparedStatement statement = conexion.prepareStatement("SELECT * FROM libros WHERE titulo = ?");
+        statement.setString(1, busqueda);
+        ResultSet resultSet = statement.executeQuery();
+        while (resultSet.next()) {
+            modeloTabla.addRow(new Object[]{
+                    resultSet.getString("codigo"),
+                    resultSet.getString("titulo"),
+                    resultSet.getString("autor"),
+                    resultSet.getString("paginas"),
+                    resultSet.getString("editorial"),
+                    resultSet.getString("isbn"),
+                    resultSet.getString("anio_publicacion"),
+                    resultSet.getInt("unidades")
+            });
+        }
+    }
+    
     // Método para cerrar la conexión a la base de datos
     public void cerrarConexion() {
         try {
@@ -194,6 +219,49 @@ class AgregarLibroGUI extends JFrame {
             }
         });
         add(btnAgregar);
+
+        btnCancelar = new JButton("Cancelar");
+        btnCancelar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                dispose();
+            }
+        });
+        add(btnCancelar);
+
+        setVisible(true);
+    }
+}
+
+class BuscarLibroGUI extends JFrame {
+    private LibrosGUI gui;
+    private JTextField txtBuscar;
+    private JButton btnBuscar, btnCancelar;
+
+    public BuscarLibroGUI(LibrosGUI gui) {
+        this.gui = gui;
+        setTitle("Buscar Libro");
+        setSize(600, 100);
+        setLayout(new GridLayout(1, 2));
+
+        add(new JLabel("Título:"));
+        txtBuscar = new JTextField();
+        add(txtBuscar);
+
+        btnBuscar = new JButton("Buscar");
+        btnBuscar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Validar y agregar el material
+                String busqueda = txtBuscar.getText();
+
+                try {
+                    gui.buscarContenido(busqueda);
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+                dispose();
+            }
+        });
+        add(btnBuscar);
 
         btnCancelar = new JButton("Cancelar");
         btnCancelar.addActionListener(new ActionListener() {
