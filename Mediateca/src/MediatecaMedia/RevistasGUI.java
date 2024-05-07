@@ -44,6 +44,10 @@ public class RevistasGUI extends JFrame {
             }
         });
         
+        btnBorrar.addActionListener((ActionEvent e) -> {
+            BorrarRevistaGUI borrarRevistaGUI = new BorrarRevistaGUI(RevistasGUI.this);
+        });
+        
         btnBuscar.addActionListener((ActionEvent e) -> {
             // Abre la ventana para buscar material
             BuscarRevistaGUI buscarRevistaGUI = new BuscarRevistaGUI(RevistasGUI.this);
@@ -140,6 +144,15 @@ public class RevistasGUI extends JFrame {
                     resultSet.getInt("unidades")
             });
         }
+    }
+    
+    // Metodo para borrar material en la base de datos
+    public void borrarContenido(String codigo) throws SQLException {
+        modeloTabla.setRowCount(0);
+        PreparedStatement statement = conexion.prepareStatement("DELETE FROM revistas WHERE codigo = ?");
+        statement.setString(1, codigo);
+        statement.executeUpdate();
+        this.cargarContenido();
     }
     
     // Método para cerrar la conexión a la base de datos
@@ -245,6 +258,49 @@ class BuscarRevistaGUI extends JFrame {
 
                 try {
                     gui.buscarContenido(busqueda);
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+                dispose();
+            }
+        });
+        add(btnBuscar);
+
+        btnCancelar = new JButton("Cancelar");
+        btnCancelar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                dispose();
+            }
+        });
+        add(btnCancelar);
+
+        setVisible(true);
+    }
+}
+
+class BorrarRevistaGUI extends JFrame {
+    private RevistasGUI gui;
+    private JTextField txtBorrar;
+    private JButton btnBuscar, btnCancelar;
+
+    public BorrarRevistaGUI(RevistasGUI gui) {
+        this.gui = gui;
+        setTitle("Borrar Revista");
+        setSize(600, 100);
+        setLayout(new GridLayout(1, 2));
+
+        add(new JLabel("Código:"));
+        txtBorrar = new JTextField();
+        add(txtBorrar);
+
+        btnBuscar = new JButton("Borrar");
+        btnBuscar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Validar y agregar el material
+                String codigo = txtBorrar.getText();
+
+                try {
+                    gui.borrarContenido(codigo);
                 } catch (SQLException ex) {
                     ex.printStackTrace();
                 }
