@@ -29,7 +29,7 @@ public class DVDsGUI extends JFrame {
         btnListar = new JButton("Listar DVDs Disponibles");
         btnBorrar = new JButton("Borrar DVD");
         btnBuscar = new JButton("Buscar DVD");
-        btnSalir = new JButton("Salir");
+        btnSalir = new JButton("Regresar");
 
         btnAgregar.addActionListener((ActionEvent e) -> {
             // Abre la ventana para agregar material

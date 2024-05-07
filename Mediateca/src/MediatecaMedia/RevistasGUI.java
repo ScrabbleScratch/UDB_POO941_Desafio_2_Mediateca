@@ -29,7 +29,7 @@ public class RevistasGUI extends JFrame {
         btnListar = new JButton("Listar Revistas Disponibles");
         btnBorrar = new JButton("Borrar Revista");
         btnBuscar = new JButton("Buscar Revista");
-        btnSalir = new JButton("Salir");
+        btnSalir = new JButton("Regresar");
 
         btnAgregar.addActionListener((ActionEvent e) -> {
             // Abre la ventana para agregar material

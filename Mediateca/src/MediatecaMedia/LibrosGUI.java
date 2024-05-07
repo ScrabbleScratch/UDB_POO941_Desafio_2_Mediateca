@@ -29,7 +29,7 @@ public class LibrosGUI extends JFrame {
         btnListar = new JButton("Listar Libros Disponibles");
         btnBorrar = new JButton("Borrar Libro");
         btnBuscar = new JButton("Buscar Libro");
-        btnSalir = new JButton("Salir");
+        btnSalir = new JButton("Regresar");
 
         btnAgregar.addActionListener((ActionEvent e) -> {
             // Abre la ventana para agregar material

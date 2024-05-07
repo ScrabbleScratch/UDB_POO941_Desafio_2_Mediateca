@@ -29,7 +29,7 @@ public class CDsGUI extends JFrame {
         btnListar = new JButton("Listar CDs Disponibles");
         btnBorrar = new JButton("Borrar CD");
         btnBuscar = new JButton("Buscar CD");
-        btnSalir = new JButton("Salir");
+        btnSalir = new JButton("Regresar");
 
         btnAgregar.addActionListener((ActionEvent e) -> {
             // Abre la ventana para agregar material
