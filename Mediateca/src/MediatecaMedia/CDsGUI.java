@@ -208,7 +208,7 @@ class CD {
     private int canciones;
     private int unidades;
 
-    public CD(String codigo, String titulo, String artista, String genero, int duracion, int canciones, int Unidades) {
+    public CD(String codigo, String titulo, String artista, String genero, int duracion, int canciones, int unidades) {
         this.codigo = codigo;
         this.titulo = titulo;
         this.artista = artista;
