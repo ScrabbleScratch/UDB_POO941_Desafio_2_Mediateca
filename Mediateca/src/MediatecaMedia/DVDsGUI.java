@@ -36,6 +36,11 @@ public class DVDsGUI extends JFrame {
             AgregarDVDGUI agregarDVDGUI = new AgregarDVDGUI(DVDsGUI.this);
         });
         
+        btnModificar.addActionListener((ActionEvent e) -> {
+            // Abre la ventana para agregar material
+            ModificarDVDGUI modificarDVDGUI = new ModificarDVDGUI(DVDsGUI.this);
+        });
+        
         btnListar.addActionListener((ActionEvent e) -> {
             try {
                 cargarContenido();
@@ -125,6 +130,20 @@ public class DVDsGUI extends JFrame {
         cargarContenido();
     }
     
+    // Método para modificar un material a la base de datos y actualizar la tabla
+    public void modificarContenido(DVD dvd) throws SQLException {
+        PreparedStatement statement = conexion.prepareStatement(
+            "UPDATE dvds SET titulo = ?, director = ?, duracion = ?, genero = ? " +
+                "WHERE codigo = ? LIMIT 1");
+        statement.setString(1, dvd.getTitulo());
+        statement.setString(2, dvd.getDirector());
+        statement.setInt(3, dvd.getDuracion());
+        statement.setString(4, dvd.getGenero());
+        statement.setString(5, dvd.getCodigo());
+        statement.executeUpdate();
+        cargarContenido();
+    }
+    
     // Metodo para buscar material en la base de datos
     public void buscarContenido(String busqueda) throws SQLException {
         modeloTabla.setRowCount(0);
@@ -149,6 +168,14 @@ public class DVDsGUI extends JFrame {
         statement.setString(1, codigo);
         statement.executeUpdate();
         this.cargarContenido();
+    }
+    
+    // Metodo para obtener data de material en la base de datos
+    public ResultSet getContenido(String codigo) throws SQLException {
+        PreparedStatement statement = conexion.prepareStatement("SELECT * FROM dvds WHERE codigo = ?");
+        statement.setString(1, codigo);
+        ResultSet resultSet = statement.executeQuery();
+        return resultSet;
     }
 
     // Método para cerrar la conexión a la base de datos
@@ -213,6 +240,115 @@ class AgregarDVDGUI extends JFrame {
             }
         });
         add(btnAgregar);
+
+        btnCancelar = new JButton("Cancelar");
+        btnCancelar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                dispose();
+            }
+        });
+        add(btnCancelar);
+
+        setVisible(true);
+    }
+}
+
+class ModificarDVDGUI extends JFrame {
+    private DVDsGUI gui;
+    private JTextField txtCodigo, txtTitulo, txtDirector, txtGenero, txtDuracion;
+    private JButton btnBuscar, btnModificar, btnCancelar;
+
+    public ModificarDVDGUI(DVDsGUI gui, DVD dvd) {
+        setTitle("Editar DVD");
+        setSize(600, 200);
+        setLayout(new GridLayout(3, 2));
+
+        add(new JLabel("Código:"));
+        add(new JLabel(dvd.getCodigo()));
+
+        add(new JLabel("Título:"));
+        txtTitulo = new JTextField(dvd.getTitulo());
+        add(txtTitulo);
+
+        add(new JLabel("Director:"));
+        txtDirector = new JTextField(dvd.getDirector());
+        add(txtDirector);
+        
+        add(new JLabel("Qué genero es:"));
+        txtGenero = new JTextField(dvd.getGenero());
+        add(txtGenero);
+        
+        add(new JLabel("Duración:"));
+        txtDuracion = new JTextField(Integer.toString(dvd.getDuracion()));
+        add(txtDuracion);
+
+        btnModificar = new JButton("Modificar");
+        btnModificar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Validar y agregar el material
+                String codigo = dvd.getCodigo();
+                String titulo = txtTitulo.getText();
+                String artista = txtDirector.getText();
+                String genero = txtGenero.getText();
+                int duracion = Integer.parseInt(txtDuracion.getText());
+
+                DVD editedDvd = new DVD(codigo, titulo, artista, duracion, genero);
+                try {
+                    gui.modificarContenido(editedDvd);
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+                dispose();
+            }
+        });
+        add(btnModificar);
+
+        btnCancelar = new JButton("Cancelar");
+        btnCancelar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                dispose();
+            }
+        });
+        add(btnCancelar);
+
+        setVisible(true);
+    }
+    
+    public ModificarDVDGUI(DVDsGUI gui) {
+        this.gui = gui;
+        setTitle("Buscar DVD");
+        setSize(600, 100);
+        setLayout(new GridLayout(1, 2));
+
+        add(new JLabel("Código:"));
+        txtCodigo = new JTextField();
+        add(txtCodigo);
+
+        btnBuscar = new JButton("Buscar");
+        btnBuscar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Validar y agregar el material
+                String codigo = txtCodigo.getText();
+
+                try {
+                    ResultSet results = gui.getContenido(codigo);
+                    if (results.next()) {
+                        DVD dvd = new DVD(
+                            results.getString("codigo"),
+                            results.getString("titulo"),
+                            results.getString("director"),
+                            results.getInt("duracion"),
+                            results.getString("genero")
+                        );
+                        new ModificarDVDGUI(gui, dvd);
+                    }
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+                dispose();
+            }
+        });
+        add(btnBuscar);
 
         btnCancelar = new JButton("Cancelar");
         btnCancelar.addActionListener(new ActionListener() {

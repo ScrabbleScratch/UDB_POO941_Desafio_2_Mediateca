@@ -36,6 +36,11 @@ public class CDsGUI extends JFrame {
             AgregarCDGUI agregarCDGUI = new AgregarCDGUI(CDsGUI.this);
         });
         
+        btnModificar.addActionListener((ActionEvent e) -> {
+            // Abre la ventana para agregar material
+            ModificarCDGUI modificarCDGUI = new ModificarCDGUI(CDsGUI.this);
+        });
+        
         btnListar.addActionListener((ActionEvent e) -> {
             try {
                 cargarContenido();
@@ -130,6 +135,22 @@ public class CDsGUI extends JFrame {
         cargarContenido();
     }
     
+    // Método para modificar un material a la base de datos y actualizar la tabla
+    public void modificarContenido(CD cd) throws SQLException {
+        PreparedStatement statement = conexion.prepareStatement(
+            "UPDATE cds SET titulo = ?, artista = ?, genero = ?, duracion = ?, canciones = ?, unidades = ? " +
+                "WHERE codigo = ? LIMIT 1");
+        statement.setString(1, cd.getTitulo());
+        statement.setString(2, cd.getArtista());
+        statement.setString(3, cd.getGenero());
+        statement.setInt(4, cd.getDuracion());
+        statement.setInt(5, cd.getCanciones());
+        statement.setInt(6, cd.getUnidades());
+        statement.setString(7, cd.getCodigo());
+        statement.executeUpdate();
+        cargarContenido();
+    }
+    
     // Metodo para buscar material en la base de datos
     public void buscarContenido(String busqueda) throws SQLException {
         modeloTabla.setRowCount(0);
@@ -156,6 +177,14 @@ public class CDsGUI extends JFrame {
         statement.setString(1, codigo);
         statement.executeUpdate();
         this.cargarContenido();
+    }
+    
+    // Metodo para obtener data de material en la base de datos
+    public ResultSet getContenido(String codigo) throws SQLException {
+        PreparedStatement statement = conexion.prepareStatement("SELECT * FROM cds WHERE codigo = ?");
+        statement.setString(1, codigo);
+        ResultSet resultSet = statement.executeQuery();
+        return resultSet;
     }
 
     // Método para cerrar la conexión a la base de datos
@@ -230,6 +259,127 @@ class AgregarCDGUI extends JFrame {
             }
         });
         add(btnAgregar);
+
+        btnCancelar = new JButton("Cancelar");
+        btnCancelar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                dispose();
+            }
+        });
+        add(btnCancelar);
+
+        setVisible(true);
+    }
+}
+
+class ModificarCDGUI extends JFrame {
+    private CDsGUI gui;
+    private JTextField txtCodigo, txtTitulo, txtArtista, txtGenero, txtDuracion, txtCanciones , txtUnidades;
+    private JButton btnBuscar, btnModificar, btnCancelar;
+
+    public ModificarCDGUI(CDsGUI gui, CD cd) {
+        setTitle("Editar CD");
+        setSize(600, 300);
+        setLayout(new GridLayout(4, 2));
+        
+        add(new JLabel("Código:"));
+        add(new JLabel(cd.getCodigo()));
+
+        add(new JLabel("Título:"));
+        txtTitulo = new JTextField(cd.getTitulo());
+        add(txtTitulo);
+
+        add(new JLabel("Artista:"));
+        txtArtista = new JTextField(cd.getArtista());
+        add(txtArtista);
+        
+        add(new JLabel("Qué genero es:"));
+        txtGenero = new JTextField(cd.getGenero());
+        add(txtGenero);
+        
+        add(new JLabel("Duración:"));
+        txtDuracion = new JTextField(Integer.toString(cd.getDuracion()));
+        add(txtDuracion);
+        
+        add(new JLabel("Número de canciones:"));
+        txtCanciones = new JTextField(Integer.toString(cd.getCanciones()));
+        add(txtCanciones);
+
+        add(new JLabel("Unidades disponibles:"));
+        txtUnidades = new JTextField(Integer.toString(cd.getUnidades()));
+        add(txtUnidades);
+
+        btnModificar = new JButton("Modificar");
+        btnModificar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Validar y agregar el material
+                String codigo = cd.getCodigo();
+                String titulo = txtTitulo.getText();
+                String artista = txtArtista.getText();
+                String genero = txtGenero.getText();
+                int duracion = Integer.parseInt(txtDuracion.getText());
+                int numero = Integer.parseInt(txtCanciones.getText());
+                int unidades = Integer.parseInt(txtUnidades.getText());
+
+                CD editedCd = new CD(codigo, titulo, artista, genero, duracion, numero, unidades);
+                try {
+                    gui.modificarContenido(editedCd);
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+                dispose();
+            }
+        });
+        add(btnModificar);
+
+        btnCancelar = new JButton("Cancelar");
+        btnCancelar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                dispose();
+            }
+        });
+        add(btnCancelar);
+
+        setVisible(true);
+    }
+    
+    public ModificarCDGUI(CDsGUI gui) {
+        this.gui = gui;
+        setTitle("Buscar CD");
+        setSize(600, 100);
+        setLayout(new GridLayout(1, 2));
+
+        add(new JLabel("Código:"));
+        txtCodigo = new JTextField();
+        add(txtCodigo);
+
+        btnBuscar = new JButton("Buscar");
+        btnBuscar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Validar y agregar el material
+                String codigo = txtCodigo.getText();
+
+                try {
+                    ResultSet results = gui.getContenido(codigo);
+                    if (results.next()) {
+                        CD cd = new CD(
+                            results.getString("codigo"),
+                            results.getString("titulo"),
+                            results.getString("artista"),
+                            results.getString("genero"),
+                            results.getInt("duracion"),
+                            results.getInt("canciones"),
+                            results.getInt("unidades")
+                        );
+                        new ModificarCDGUI(gui, cd);
+                    }
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+                dispose();
+            }
+        });
+        add(btnBuscar);
 
         btnCancelar = new JButton("Cancelar");
         btnCancelar.addActionListener(new ActionListener() {

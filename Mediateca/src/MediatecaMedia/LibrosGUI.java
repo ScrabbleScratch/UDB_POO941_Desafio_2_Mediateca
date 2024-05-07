@@ -35,6 +35,11 @@ public class LibrosGUI extends JFrame {
             // Abre la ventana para agregar material
             AgregarLibroGUI agregarLibroGUI = new AgregarLibroGUI(LibrosGUI.this);
         });
+        
+        btnModificar.addActionListener((ActionEvent e) -> {
+            // Abre la ventana para agregar material
+            ModificarLibroGUI modificarLibrosGUI = new ModificarLibroGUI(LibrosGUI.this);
+        });
 
         btnBorrar.addActionListener((ActionEvent e) -> {
             BorrarLibroGUI borrarLibroGUI = new BorrarLibroGUI(LibrosGUI.this);
@@ -134,6 +139,23 @@ public class LibrosGUI extends JFrame {
         cargarContenido();
     }
 
+    // Método para modificar un material a la base de datos y actualizar la tabla
+    public void modificarContenido(Libro libro) throws SQLException {
+        PreparedStatement statement = conexion.prepareStatement(
+            "UPDATE libros SET titulo = ?, autor = ?, paginas = ?, editorial = ?, isbn = ?, anio_publicacion = ?, unidades = ? " +
+                "WHERE codigo = ? LIMIT 1");
+        statement.setString(1, libro.getTitulo());
+        statement.setString(2, libro.getAutor());
+        statement.setInt(3, libro.getPaginas());
+        statement.setString(4, libro.getEditorial());
+        statement.setString(5, libro.getIsbn());
+        statement.setInt(6, libro.getPublicacion());
+        statement.setInt(7, libro.getUnidades());
+        statement.setString(8, libro.getCodigo());
+        statement.executeUpdate();
+        cargarContenido();
+    }
+    
     // Metodo para buscar material en la base de datos
     public void buscarContenido(String busqueda) throws SQLException {
         modeloTabla.setRowCount(0);
@@ -161,6 +183,14 @@ public class LibrosGUI extends JFrame {
         statement.setString(1, codigo);
         statement.executeUpdate();
         this.cargarContenido();
+    }
+    
+    // Metodo para obtener data de material en la base de datos
+    public ResultSet getContenido(String codigo) throws SQLException {
+        PreparedStatement statement = conexion.prepareStatement("SELECT * FROM libros WHERE codigo = ?");
+        statement.setString(1, codigo);
+        ResultSet resultSet = statement.executeQuery();
+        return resultSet;
     }
     
     // Método para cerrar la conexión a la base de datos
@@ -240,6 +270,133 @@ class AgregarLibroGUI extends JFrame {
             }
         });
         add(btnAgregar);
+
+        btnCancelar = new JButton("Cancelar");
+        btnCancelar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                dispose();
+            }
+        });
+        add(btnCancelar);
+
+        setVisible(true);
+    }
+}
+
+class ModificarLibroGUI extends JFrame {
+    private LibrosGUI gui;
+    private JTextField txtCodigo, txtTitulo, txtAutor, txtPaginas, txtEditorial, txtIsbn, txtPublicacion, txtUnidades;
+    private JButton btnBuscar, btnModificar, btnCancelar;
+
+    public ModificarLibroGUI(LibrosGUI gui, Libro libro) {
+        setTitle("Editar Libro");
+        setSize(600, 300);
+        setLayout(new GridLayout(5, 2));
+
+        add(new JLabel("Código:"));
+        add(new JLabel(libro.getCodigo()));
+
+        add(new JLabel("Título:"));
+        txtTitulo = new JTextField(libro.getTitulo());
+        add(txtTitulo);
+        
+        add(new JLabel("Autor:"));
+        txtAutor = new JTextField(libro.getAutor());
+        add(txtAutor);
+        
+        add(new JLabel("Páginas:"));
+        txtPaginas = new JTextField(Integer.toString(libro.getPaginas()));
+        add(txtPaginas);
+
+        add(new JLabel("Editorial:"));
+        txtEditorial = new JTextField(libro.getEditorial());
+        add(txtEditorial);
+        
+        add(new JLabel("ISBN:"));
+        txtIsbn = new JTextField(libro.getIsbn());
+        add(txtIsbn);
+        
+        add(new JLabel("Año de publicación:"));
+        txtPublicacion = new JTextField(Integer.toString(libro.getPublicacion()));
+        add(txtPublicacion);
+
+        add(new JLabel("Unidades disponibles:"));
+        txtUnidades = new JTextField(Integer.toString(libro.getUnidades()));
+        add(txtUnidades);
+
+        btnModificar = new JButton("Modificar");
+        btnModificar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Validar y agregar el material
+                String codigo = libro.getCodigo();
+                String titulo = txtTitulo.getText();
+                String autor = txtAutor.getText();
+                int paginas = Integer.parseInt(txtPaginas.getText());
+                String editorial = txtEditorial.getText();
+                String isbn = txtIsbn.getText();
+                int publicacion = Integer.parseInt(txtPublicacion.getText());
+                int unidades = Integer.parseInt(txtUnidades.getText());
+
+                Libro libro = new Libro(codigo, titulo, autor, paginas, editorial, isbn, publicacion, unidades);
+                try {
+                    gui.modificarContenido(libro);
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+                dispose();
+            }
+        });
+        add(btnModificar);
+
+        btnCancelar = new JButton("Cancelar");
+        btnCancelar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                dispose();
+            }
+        });
+        add(btnCancelar);
+
+        setVisible(true);
+    }
+    
+    public ModificarLibroGUI(LibrosGUI gui) {
+        this.gui = gui;
+        setTitle("Buscar Libro");
+        setSize(600, 100);
+        setLayout(new GridLayout(1, 2));
+
+        add(new JLabel("Código:"));
+        txtCodigo = new JTextField();
+        add(txtCodigo);
+
+        btnBuscar = new JButton("Buscar");
+        btnBuscar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Validar y agregar el material
+                String codigo = txtCodigo.getText();
+
+                try {
+                    ResultSet results = gui.getContenido(codigo);
+                    if (results.next()) {
+                        Libro libro = new Libro(
+                            results.getString("codigo"),
+                            results.getString("titulo"),
+                            results.getString("autor"),
+                            results.getInt("paginas"),
+                            results.getString("editorial"),
+                            results.getString("isbn"),
+                            results.getInt("anio_publicacion"),
+                            results.getInt("unidades")
+                        );
+                        new ModificarLibroGUI(gui, libro);
+                    }
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+                dispose();
+            }
+        });
+        add(btnBuscar);
 
         btnCancelar = new JButton("Cancelar");
         btnCancelar.addActionListener(new ActionListener() {

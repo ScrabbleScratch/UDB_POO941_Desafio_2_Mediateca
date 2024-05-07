@@ -36,6 +36,11 @@ public class RevistasGUI extends JFrame {
             AgregarRevistaGUI agregarRevistaGUI = new AgregarRevistaGUI(RevistasGUI.this);
         });
         
+        btnModificar.addActionListener((ActionEvent e) -> {
+            // Abre la ventana para agregar material
+            ModificarRevistaGUI modificarRevistaGUI = new ModificarRevistaGUI(RevistasGUI.this);
+        });
+        
         btnListar.addActionListener((ActionEvent e) -> {
             try {
                 cargarContenido();
@@ -128,6 +133,21 @@ public class RevistasGUI extends JFrame {
         cargarContenido();
     }
 
+    // Método para modificar un material a la base de datos y actualizar la tabla
+    public void modificarContenido(Revista revista) throws SQLException {
+        PreparedStatement statement = conexion.prepareStatement(
+            "UPDATE revistas SET titulo = ?, editorial = ?, periodicidad = ?, fecha_publicacion = ?, unidades = ? " +
+                "WHERE codigo = ? LIMIT 1");
+        statement.setString(1, revista.getTitulo());
+        statement.setString(2, revista.getEditorial());
+        statement.setString(3, revista.getPeriodicidad());
+        statement.setString(4, revista.getPublicacion());
+        statement.setInt(5, revista.getUnidades());
+        statement.setString(6, revista.getCodigo());
+        statement.executeUpdate();
+        cargarContenido();
+    }
+
     // Metodo para buscar material en la base de datos
     public void buscarContenido(String busqueda) throws SQLException {
         modeloTabla.setRowCount(0);
@@ -153,6 +173,14 @@ public class RevistasGUI extends JFrame {
         statement.setString(1, codigo);
         statement.executeUpdate();
         this.cargarContenido();
+    }
+    
+    // Metodo para obtener data de material en la base de datos
+    public ResultSet getContenido(String codigo) throws SQLException {
+        PreparedStatement statement = conexion.prepareStatement("SELECT * FROM revistas WHERE codigo = ?");
+        statement.setString(1, codigo);
+        ResultSet resultSet = statement.executeQuery();
+        return resultSet;
     }
     
     // Método para cerrar la conexión a la base de datos
@@ -222,6 +250,121 @@ class AgregarRevistaGUI extends JFrame {
             }
         });
         add(btnAgregar);
+
+        btnCancelar = new JButton("Cancelar");
+        btnCancelar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                dispose();
+            }
+        });
+        add(btnCancelar);
+
+        setVisible(true);
+    }
+}
+
+class ModificarRevistaGUI extends JFrame {
+    private RevistasGUI gui;
+    private JTextField txtCodigo, txtTitulo, txtEditorial, txtPeriodicidad, txtPublicacion, txtUnidades;
+    private JButton btnBuscar, btnModificar, btnCancelar;
+
+    public ModificarRevistaGUI(RevistasGUI gui, Revista revista) {
+        setTitle("Editar Revista");
+        setSize(600, 250);
+        setLayout(new GridLayout(4, 2));
+
+        add(new JLabel("Código:"));
+        add(new JLabel(revista.getCodigo()));
+
+        add(new JLabel("Título:"));
+        txtTitulo = new JTextField(revista.getTitulo());
+        add(txtTitulo);
+
+        add(new JLabel("Editorial:"));
+        txtEditorial = new JTextField(revista.getEditorial());
+        add(txtEditorial);
+
+        add(new JLabel("Periodicidad:"));
+        txtPeriodicidad = new JTextField(revista.getPeriodicidad());
+        add(txtPeriodicidad);
+
+        add(new JLabel("Fecha de publicación:"));
+        txtPublicacion = new JTextField(revista.getPublicacion());
+        add(txtPublicacion);
+
+        add(new JLabel("Unidades disponibles:"));
+        txtUnidades = new JTextField(Integer.toString(revista.getUnidades()));
+        add(txtUnidades);
+
+        btnModificar = new JButton("Modificar");
+        btnModificar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Validar y agregar el material
+                String codigo = revista.getCodigo();
+                String titulo = txtTitulo.getText();
+                String editorial = txtEditorial.getText();
+                String periodicidad = txtPeriodicidad.getText();
+                String publicacion = txtPublicacion.getText();
+                int unidades = Integer.parseInt(txtUnidades.getText());
+
+                Revista revista = new Revista(codigo, titulo, editorial, periodicidad, publicacion, unidades);
+                try {
+                    gui.modificarContenido(revista);
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+                dispose();
+            }
+        });
+        add(btnModificar);
+
+        btnCancelar = new JButton("Cancelar");
+        btnCancelar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                dispose();
+            }
+        });
+        add(btnCancelar);
+
+        setVisible(true);
+    }
+    
+    public ModificarRevistaGUI(RevistasGUI gui) {
+        this.gui = gui;
+        setTitle("Buscar Revista");
+        setSize(600, 100);
+        setLayout(new GridLayout(1, 2));
+
+        add(new JLabel("Código:"));
+        txtCodigo = new JTextField();
+        add(txtCodigo);
+
+        btnBuscar = new JButton("Buscar");
+        btnBuscar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Validar y agregar el material
+                String codigo = txtCodigo.getText();
+
+                try {
+                    ResultSet results = gui.getContenido(codigo);
+                    if (results.next()) {
+                        Revista revista = new Revista(
+                            results.getString("codigo"),
+                            results.getString("titulo"),
+                            results.getString("editorial"),
+                            results.getString("periodicidad"),
+                            results.getString("fecha_publicacion"),
+                            results.getInt("unidades")
+                        );
+                        new ModificarRevistaGUI(gui, revista);
+                    }
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+                dispose();
+            }
+        });
+        add(btnBuscar);
 
         btnCancelar = new JButton("Cancelar");
         btnCancelar.addActionListener(new ActionListener() {
